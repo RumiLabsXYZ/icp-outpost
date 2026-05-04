@@ -1,0 +1,98 @@
+type HealthLevel = variant {
+  Green;
+  Yellow;
+  Red;
+};
+
+type FormattedNumber = record {
+  raw_e8s: nat64;
+  decimals: nat8;
+  formatted: text;
+};
+
+type EventRowDTO = record {
+  source: text;
+  source_event_id: nat64;
+  global_id: text;
+  kind: text;
+  timestamp_ns: nat64;
+  primary_principal: opt principal;
+  primary_amount: opt FormattedNumber;
+  secondary_principal: opt principal;
+  approximate: bool;
+  payload_summary: text;
+};
+
+type HealthSummaryDTO = record {
+  level: HealthLevel;
+  message: text;
+  source_lag_seconds: nat64;
+  any_error: bool;
+  generated_at_ns: nat64;
+};
+
+type OverviewDTO = record {
+  recent_activity: vec EventRowDTO;
+  health: HealthSummaryDTO;
+  generated_at_ns: nat64;
+  cache_age_ms: nat64;
+};
+
+type ActivityFilter = record {
+  sources: opt vec text;
+  types: opt vec text;
+  filter_principal: opt principal;
+  from_ns: opt nat64;
+  to_ns: opt nat64;
+};
+
+type ActivityCursor = record {
+  before_global_id: opt text;
+  page_size: nat32;
+};
+
+type ActivityFeedDTO = record {
+  events: vec EventRowDTO;
+  next_cursor: opt text;
+  total_estimated: nat64;
+  filters_applied: ActivityFilter;
+};
+
+type EntityDTO = record {
+  id: text;
+  kind: text;
+  display_label: text;
+  recent_events: vec EventRowDTO;
+  generated_at_ns: nat64;
+};
+
+type EventDetailDTO = record {
+  global_id: text;
+  source: text;
+  source_event_id: nat64;
+  kind: text;
+  timestamp_ns: nat64;
+  payload_summary: text;
+  payload_json: text;
+  related_event_ids: vec text;
+  generated_at_ns: nat64;
+};
+
+type InitArgs = record {
+  main : principal;
+  secondary : opt principal;
+  admin : opt principal;
+};
+
+type SetSourceResult = variant { Ok; Err : text };
+
+service : (InitArgs) -> {
+  ping: () -> (text) query;
+  get_health: () -> (HealthSummaryDTO) query;
+  get_overview: () -> (OverviewDTO) query;
+  get_activity: (ActivityFilter, ActivityCursor) -> (ActivityFeedDTO);
+  get_entity: (text, text) -> (EntityDTO);
+  get_event: (text) -> (EventDetailDTO);
+  get_source_canisters: () -> (record { main : principal; secondary : opt principal }) query;
+  set_source_canister: (text, principal) -> (SetSourceResult);
+}

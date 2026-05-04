@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.mops/
+.dccache
+
+# Build artifacts
+dist/
+.icp/cache/
+target/
+
+# Generated bindings are committed for developer convenience.
+# They are regenerated on every `npm run build` via the vite plugin.
+# To force regeneration: delete src/bindings/ and run `npm run build`.
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+**/*~
+
+# Env
+.env
+.env.local
+
+# Worktrees (if anyone uses them in this repo)
+.worktrees/
